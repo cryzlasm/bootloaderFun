@@ -9,6 +9,13 @@ Dependencies :
 
 This is an experiment made to get familiar with MBR and bootloader code, in 16bit realmode assembly.
 
+useful links:
+ - http://wiki.osdev.org/Real_Mode
+ - http://ref.x86asm.net/coder32.html
+ - https://en.wikipedia.org/wiki/BIOS_interrupt_call
+ - https://www.gladir.com/LEXIQUE/INTR/INDEX.HTM
+ - https://appusajeev.wordpress.com/2011/01/27/writing-a-16-bit-real-mode-os-nasm/
+
              _             
             (_)            
    ___ _ __  _  ___  _   _ 
