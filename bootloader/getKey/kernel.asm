@@ -61,7 +61,10 @@ getKey:
     ret
 
 printByteValue:
-    mov bx, ax ; save byte to convert into bl
+    push ax
+    push bx
+
+    mov bx, ax ; save byte to convert into bx
 
     mov al, 0x30
     call printCharacter ; print '0'
@@ -73,13 +76,15 @@ printByteValue:
     shr ax, 4
     and ax,0x0f
     call hexToAscii
-    call printCharacter
+    call printCharacter ; print high nibble
 
     mov ax, bx
     and ax, 0xf
     call hexToAscii
-    call printCharacter
+    call printCharacter ; print low nibble
 
+    pop bx
+    pop ax
     ret
 
 hexToAscii:
@@ -92,6 +97,6 @@ hexToAscii:
     pop si
     ret
     
-msg db "Hello Chan!"
-table db "0123456789ABCDEF"
+msg db "Hello Chan!", 0x00
+table db "0123456789ABCDEF", 0x00
 times 512-($-$$) db 0 ;kernel must have size multiple of 512 so let's pad it to the correct size
