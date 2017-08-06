@@ -1,69 +1,69 @@
 org 0x8000 
 bits 16
 
-call initScreen
+call initScreen ; screen initialisation, set the fixed strings on the screen
+
 
 main:
-.mainLoop:
-    call getKey
-    cmp ax, 0x0231
+.mainLoop: ; main loop, wait for a keypress and print details on screen
+    call getKey ; wait and get the return value from a keypress into ax
+    cmp ax, 0x0231 ; if the key is '1', leave the main loop. (Arbitrary value, no particular raison)
     jz .mainEnd
-    call printByteValue
+    call printWordValue ; print keycode values on screen
 
 jmp .mainLoop
 .mainEnd:
 
 
-mov si, posChan
-lodsw
-call setCursorPosition
+mov si, posChan ;
+lodsw ; ax = [si]
+call setCursorPosition ; Change cursor position
 
 mov si, stringChan
 call printNullTerminatedString
 
 jmp $   ; this freezes the system, best for testing
-hlt		;this makes a real system halt
-ret     ;this makes qemu halt, to ensure everything works we add both
+hlt		; this makes a real system halt
+ret     ; this makes qemu halt, to ensure everything works we add both
 
 
 
 ; #########################################
+;              FUNCTIONS
 ; #########################################
 
-initScreen:
-    pusha
+initScreen: ; Screen initialisation. Cleanup and print permanent string
+            ; Args : None
+    pusha ; save all registers
 
-    mov al, 0x03
-    mov ah, 0x0
-    int 0x10
-
-    call clearScreen
+    call clearScreen ; clean screen
 
     mov si, posBanner
     lodsw
-    call setCursorPosition
+    call setCursorPosition ; Update cursor position
 
     mov si, stringBanner
-    call printNullTerminatedString
+    call printNullTerminatedString ; print Banner
 
     mov si, posAhCaption
     lodsw
-    call setCursorPosition
+    call setCursorPosition ; Update cursor position
 
     mov si, ahCaption
-    call printNullTerminatedString
+    call printNullTerminatedString ; print "AH: "
 
     mov si, posAlCaption
     lodsw
-    call setCursorPosition
+    call setCursorPosition ; Update cursor position
 
     mov si, alCaption
-    call printNullTerminatedString
+    call printNullTerminatedString ; print "AL: "
 
-    popa
+    popa ; restore all registers
     ret
 
-clearScreen:
+clearScreen: ; Clean screen
+             ; Args : None
     pusha
 
     mov ax, 0x0700  ; function 07, AL=0 means scroll whole window
@@ -76,7 +76,9 @@ clearScreen:
     ret
 
 
-printCharacter:
+printCharacter: ; Print a char at current cursor location
+                ; Args : 
+                ; AL : char ascii value
     push bx
     push ax
 	;before calling this function al must be set to the character to print
@@ -88,7 +90,9 @@ printCharacter:
     pop bx
 	ret	
 
-printNullTerminatedString:
+printNullTerminatedString: ; Print a null terminated string
+                           ; Args :
+                           ; SI : string address
 	pusha ;save all registers to be able to call this from where every we want
 	.loop:
 		lodsb ;loads byte from si into al and increases si
@@ -100,7 +104,10 @@ printNullTerminatedString:
 	popa ;restore registers to original state
 	ret
 
-setCursorPosition:
+setCursorPosition: ; Change cursor position
+                   ; Args :
+                   ; AH : line number
+                   ; AL : column number
     pusha
     mov dx, ax
     mov bh, 0x00
@@ -109,26 +116,27 @@ setCursorPosition:
     popa
     ret
 
-getKey:
+getKey: ; Return a keystroke value into ax
     xor ah, ah
     int 0x16
     ret
 
-printByteValue:
+printWordValue: ; Print word value on screen
     pusha
-    mov bx, ax
-    shr ax, 8
-    call printHighNibble
+    mov bx, ax ; save ax into bx
+    shr ax, 8 ; get AH into AL, AH = 0
+    call printHighByte ; print original AH value
 
     mov ax, bx
-    and ax, 0xFF
-    call printLowNibble
+    and ax, 0xFF ; null the AH part
+    call printLowByte ; print original AL value
 
     popa
     ret
 
 
-printHighNibble:
+printHighByte: ; Print the byte value in front of the 'AH' label.
+               ; Should be merged with printLowByte
     push ax
     push bx
 
@@ -159,7 +167,7 @@ printHighNibble:
     pop ax
     ret
 
-printLowNibble:
+printLowByte: ; Print the byte value in front of the 'AL' label
     push ax
     push bx
 
@@ -189,10 +197,10 @@ printLowNibble:
     pop ax
     ret
 
-hexToAscii:
+hexToAscii: ; convert an hex value between 0 and f into its ascii value
     push si
 
-    mov si, hexChar 
+    mov si, hexChar ; hexChar is an ascii table, the hex value is an offset into this table
     add si, ax 
     lodsb
 
@@ -200,14 +208,14 @@ hexToAscii:
     ret
     
 
-posBanner dw 0x0013
-posChan dw 0x1010
+posBanner dw 0x0013 ; line : 0; column : 0x13
+posChan dw 0x1010 ; L: 0x10, C: 0x10
 
-posAhCaption dw 0x0400
-posAhValue   dw 0x0404
+posAhCaption dw 0x0400; L: 0x04, C: 0x00
+posAhValue   dw 0x0404; L: 0x04, C: 0x04
 
-posAlCaption dw 0x0500
-posAlValue   dw 0x0504
+posAlCaption dw 0x0500; L: 0x05, C: 0x00
+posAlValue   dw 0x0504; L: 0x05, C: 0x04
 
 stringChan db "Hello Chan!", 0x00
 stringBanner db "Printing your last keystroke value", 0x00
