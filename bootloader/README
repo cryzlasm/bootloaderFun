@@ -1,3 +1,19 @@
 Code is based on https://0x00sec.org/t/realmode-assembly-writing-bootable-stuff-part-2/2992
 
 Thanks 0x00sec !
+
+Dependencies :
+ - nasm
+ - qemu-system-i386
+ 
+
+This is an experiment made to get familiar with MBR and bootloader code, in 16bit realmode assembly.
+
+             _             
+            (_)            
+   ___ _ __  _  ___  _   _ 
+  / _ \ '_ \| |/ _ \| | | |
+ |  __/ | | | | (_) | |_| |
+  \___|_| |_| |\___/ \__, |
+           _/ |       __/ |
+          |__/       |___/ 
